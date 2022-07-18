@@ -2,10 +2,10 @@
  * Controlador y termostato para refrigerador Peltier, formado por dos módulos
  * de placa Peltier controlados por relés, sensores de temperatura digitales,
  * y LCD 20x04 para mostrar la información.
- * Ofrece un control total sobre el funcionamiento de la nevera: control por 
- * termostato, control manual de encendido y apagado, modo de máxima potencia 
- * (siempre ON), temporizador de encendido y apagado y corte de funcionamiento
- * en caso de sobrecalentamiento de los disipadores y componentes externos.
+ * Ofrece un control total sobre el funcionamiento de la nevera: control manual 
+ * de encendido y apagado, modo de máxima y mínima potencia (siempre 12V), corte 
+ * de funcionamiento en caso de sobrecalentamiento de los disipadores y 
+ * componentes externos, estadísticas de estado y de uso, etc.
  * Los módulos trabajan a dos voltajes:
  * Relé LOW=12V (5A por módulo aprox)
  * Relé HIGH=5V (1.5A por módulo aprox)
@@ -69,7 +69,8 @@ void setup() {
   pinMode(peltier2, OUTPUT);
 
   //------Configuración del usuario (por defecto)------
-  highPerf = false; //Modo alta potencia (Peltiers Siempre ON)
+  highPerf = false; //Modo alta potencia
+  lowPerf = false;  //Modo baja potencia
   cutOutTemp = 65;  //Temperatura de corte de corriente
   cOThreshold = 12; //Temp para fin de cutOut (cutOutTemp-cOThreshold)
   cutOut = false;   //Cortar corriente a peltiers OFF por defecto
@@ -97,10 +98,10 @@ void loop() {
 void updateStats() {
   float auxTemp = intT.readTemperature();
   float auxHum = intT.readHumidity();
-  if(!(isnan(auxTemp) || auxTemp < -2)) {
+  if(!(isnan(auxTemp) && auxTemp < -2)) {
     temp = auxTemp;
   }
-  if(!(isnan(auxHum) || auxHum < 0 || auxHum > 100)) {
+  if(!(isnan(auxHum) && auxHum < 0 && auxHum > 100)) {
     hum = auxHum;
   }
   tempExt = extT.readTemperature();
@@ -149,10 +150,10 @@ void printStatsLCD() {    //Imprime temperatura y humedad interior
   lcd.print("Humedad: ");
   lcd.print(hum);
   lcd.setCursor(0, 3);
-  lcd.print("Peltiers ON: ");
-  
+  lcd.print("P 12V: ");
   lcd.print(i);
-  lcd.print("/2");
+  lcd.print(" P 5V: ");
+  lcd.print(2-i);
 }
 
 void buttonOptions(char keyPressed) { //Muestra menú de opciones
@@ -170,9 +171,9 @@ void buttonOptions(char keyPressed) { //Muestra menú de opciones
         key = keypad.getKey();
         delay(30);
       }
-      if(key=='3' && value>0) value--;
+      if(key=='2' && value>0) value--;
       
-      if(key=='2' && value<3) value++;
+      if(key=='3' && value<3) value++;
 
       if(key=='1') {
         bool done = false;
@@ -292,7 +293,7 @@ void buttonOptions(char keyPressed) { //Muestra menú de opciones
               lcd.print("Desactiva termostato");
               lcd.setCursor(0, 2);
               lcd.print("Peltier siempre 12V");
-              delay(2000);
+              delay(1500);
               lcd.clear();
               lcd.setCursor(1, 0);
               lcd.print("-Max. Rendimiento-");
@@ -315,6 +316,7 @@ void buttonOptions(char keyPressed) { //Muestra menú de opciones
                   digitalWrite(peltier2, pelt2State);
                   delay(1000);
                   highPerf = true;
+                  if(lowPerf) lowPerf = false;
                   return;
                 } else if(key == '2' || key == '3') {
                   lcd.clear();
@@ -338,7 +340,7 @@ void buttonOptions(char keyPressed) { //Muestra menú de opciones
               lcd.print("Modulos bajo consumo");
               lcd.setCursor(0, 3);
               lcd.print("(Bateria, coche...)");
-              delay(2000);
+              delay(1500);
               lcd.clear();
               lcd.setCursor(1, 0);
               lcd.print("-Min. Rendimiento-");
@@ -361,6 +363,7 @@ void buttonOptions(char keyPressed) { //Muestra menú de opciones
                   digitalWrite(peltier2, pelt2State);
                   delay(1000);
                   lowPerf = true;
+                  if(highPerf) highPerf = false;
                   return;
                 } else if(key == '2' || key == '3') {
                   lcd.clear();
@@ -377,7 +380,7 @@ void buttonOptions(char keyPressed) { //Muestra menú de opciones
             return;
           }
          
-         case 2:    //Estadisticas/Más info
+         case 2:    //Estadisticas
          {
             lcd.clear();
             key = NO_KEY;
@@ -406,10 +409,8 @@ void buttonOptions(char keyPressed) { //Muestra menú de opciones
             return;
           }
           
-          case 3:     //Salir
-          {
-            return;
-          }
+          case 3: return;   //Salir
+          
         lcd.clear();
         }
       }
@@ -466,7 +467,7 @@ void thermostat() {
   //Comportamiento Bajo Rendimiento (Bajo consumo)
   if(lowPerf && pelt1State == HIGH && pelt2State == HIGH) {
     return;
-  } else if(highPerf && (pelt1State == LOW || pelt2State == LOW)) {
+  } else if(lowPerf && (pelt1State == LOW || pelt2State == LOW)) {
     modulesOnOff(HIGH, HIGH);
     return;
   }
