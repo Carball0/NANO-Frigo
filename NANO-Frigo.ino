@@ -71,10 +71,10 @@ void setup() {
   //------Configuración del usuario (por defecto)------
   highPerf = false; //Modo alta potencia
   lowPerf = false;  //Modo baja potencia
-  cutOutTemp = 65;  //Temperatura de corte de corriente
+  cutOutTemp = 45;  //Temperatura de corte de corriente
   cOThreshold = 12; //Temp para fin de cutOut (cutOutTemp-cOThreshold)
   cutOut = false;   //Cortar corriente a peltiers OFF por defecto
-  tempUser = 12;    //Temperatura termostato por defecto
+  tempUser = 14;    //Temperatura termostato por defecto
   minTUser = 4;     //Temperatura termostato mínima
   maxTUser = 28;    //Temperatura termostato máxima
   digitalWrite(peltier1, pelt1State); //Enciende peltiers
