@@ -1,5 +1,5 @@
 # NANO-Frigo
-Software de gestión de nevera portátil basada en módulos Peltier TEC1-12760 y Arduino UNO.
+Software de gestión de nevera portátil basada en módulos Peltier TEC1-12760 y Arduino UNO/Nano.
 Incluye función de termostato pensado para refrigeradores Peltier, e incluye todo lo necesario para garantizar el correcto funcionamiento de la nevera.
 
 ## Componentes
@@ -29,21 +29,21 @@ Las placas Peltier siguen la siguiente curva:
 
 <img width="739" alt="peltier-curve" src="https://user-images.githubusercontent.com/58596201/179938740-d124977e-db9e-4fd6-9673-f6d52e868615.png">
 
-El comportamiento de estos módulos en tema de consumo va de forma lineal (la intensidad crece linealmente con el aumento de voltaje). Haciendo uso de este datos, el sistema utilizará **tres formas de alimentar las placas: a 12V, a 5V y a 0V (apagadas)**.
+El comportamiento de estos módulos en cuanto a consumo crece de forma lineal (la intensidad crece linealmente con el aumento de voltaje). Haciendo uso de este datos, el sistema utilizará **tres modos de alimentación: 12V, 5V y 0V (apagado)**.
 
-Tras probar los módulos a estos voltajes obtenemos los siguientes datos:
+Tras probar los módulos a estos voltajes, obtenemos los siguientes datos:
 - Peltier a **12.8V**: 4.9A (temperatura ambiente)
 - Peltier a **4.9V**: 1.5A (temperatura ambiente)
 
-Un factor importante a tener en cuenta es la temperatura del lado caliente (Hot Side). Si el hot side alcanza una temperatura extrema, la temperatura conseguida en el lado frío (Cold Side) se verá impactada negativamente.
+Un factor importante en esta configuración es la temperatura del lado caliente (hot side). Si el hot side alcanza una temperatura extrema, la temperatura generada en el lado frío (Cold Side) se verá impactada negativamente.
 
 Las placas Peltier consiguen su mejor rendimiento cuando la temperatura del hot side es la mínima posible (la más parecida a temperatura ambiente), por ello intentaremos introducir la mayor cantidad de aire en el sistema para conseguir la mayor ventilación posible.
 
 Sin embargo, la ventilación puede no ser suficiente si se lleva la nevera en un sitio cerrado como un maletero de coche, o si hace mucho calor y no se es capaz de disipar dicho calor. En este caso, se ha de implementar medidas que impidan el sobrecalentamiento de los componentes y de la propia nevera.
 
-Para ello se introduce **tres modos de trabajo distintos**, mencionadas anteriormente (**12V, 5V y apagado**). Si la temperatura de la parte caliente donde se ubican los componentes supera un umbral definido en el programa (ver apartado *Seguridad*), se ciclarán entre los distintos modos para evitar mayor calentamiento (12V a 5V, y 5V a apagado si se alcanzan temperaturas extremas).
+Para ello se introduce **tres modos de trabajo distintos**, mencionadas anteriormente (**12V, 5V y apagado**). Si la temperatura de la parte caliente donde se ubican los componentes supera un umbral definido en el programa (ver apartado *Seguridad*), se ciclarán entre los distintos modos para evitar mayor calentamiento.
 
-En distintos tiempos será más interesante utilizar modos de trabajo de menor rendimiento, ya que un modo de mayor rendimiento con temperaturas de trabajo más altas puede llegar a ser contraproducente a la hora de refrigerar.
+En distintas circunstancias será más interesante utilizar modos de trabajo de menor rendimiento, ya que un modo de mayor rendimiento que resulte en temperaturas de trabajo más altas puede llegar a ser contraproducente a la hora de refrigerar.
 
 Esto se puede regular manualmente en las variables del programa dependiendo del uso que se le vaya a dar, o manualmente a través de la interfaz del programa.
 
